@@ -1,0 +1,97 @@
+Вот шпаргалка с curl-запросами для вашего сервиса:
+
+### 1. Шифрование файла
+```bash
+curl -X POST -F "file=@path/to/your/file.txt" http://localhost:8080/file/upload
+```
+Ответ:
+```json
+{
+  "encrypted_filename": "a1b2c3d4.enc",
+  "key": "Ilbe9ZG6GZGAKYJrEYap89XUgc0JC95M6RgtA6lFQpg=",
+  "timestamp": 1745786078
+}
+```
+
+### 2. Дешифрование файла
+```bash
+curl -X POST -H "Content-Type: application/json" -d '{
+  "filename": "a1b2c3d4.enc",
+  "key": "Ilbe9ZG6GZGAKYJrEYap89XUgc0JC95M6RgtA6lFQpg="
+}' http://localhost:8080/file/download --output decrypted_file.txt
+```
+
+### 3. Шифрование текста (ECB режим)
+```bash
+curl -X POST -H "Content-Type: application/json" -d '{
+  "text": "Hello World",
+  "mode": "ecb"
+}' http://localhost:8080/text/encrypt
+```
+Ответ:
+```json
+{
+  "ciphertext": "gp1BQzRK8NhkEcKZNZBUzA==",
+  "key": "Ilbe9ZG6GZGAKYJrEYap89XUgc0JC95M6RgtA6lFQpg=",
+  "mode": "ecb",
+  "timestamp": 1745786078
+}
+```
+
+### 4. Шифрование текста (GCM режим)
+```bash
+curl -X POST -H "Content-Type: application/json" -d '{
+  "text": "Secret Message",
+  "mode": "gcm"
+}' http://localhost:8080/text/encrypt
+```
+
+### 5. Дешифрование текста (ECB режим)
+```bash
+curl -X POST -H "Content-Type: application/json" -d '{
+  "ciphertext": "gp1BQzRK8NhkEcKZNZBUzA==",
+  "key": "Ilbe9ZG6GZGAKYJrEYap89XUgc0JC95M6RgtA6lFQpg=",
+  "mode": "ecb"
+}' http://localhost:8080/text/decrypt
+```
+Ответ:
+```json
+{
+  "plaintext": "Hello World",
+  "timestamp": 1745786078
+}
+```
+
+### 6. Дешифрование текста (GCM режим)
+```bash
+curl -X POST -H "Content-Type: application/json" -d '{
+  "ciphertext": "L5U0h7kE6A0Li9Az3fYwK6K0BsOCae1tAfhBJV7TNLo=",
+  "key": "q0KmbcZhV7ZkN8n49Iva0GIG4ndwhwaZ8Y93spVRWyU=",
+  "mode": "gcm"
+}' http://localhost:8080/text/decrypt
+```
+
+### 7. Брутфорс ECB (когда известно часть ключа)
+```bash
+curl -X POST -H "Content-Type: application/json" -d '{
+  "ciphertext": "gp1BQzRK8NhkEcKZNZBUzA==",
+  "known_key_part": "Ilbe9ZG6GZGAKYJrEYap89XUgc0JC95M6RgtA6lFQ",
+  "mode": "ecb"
+}' http://localhost:8080/bruteforce
+```
+Возможный ответ:
+```json
+{
+  "plaintext": "Hello World",
+  "key": "Ilbe9ZG6GZGAKYJrEYap89XUgc0JC95M6RgtA6lFQpg=",
+  "time_taken": "5.678s"
+}
+```
+
+### Советы:
+1. Для файлов используйте абсолютные пути (`/home/user/file.txt`)
+2. При дешифровании файла указывайте `--output` для сохранения
+3. Для GCM режима всегда используйте оригинальный ключ
+4. Брутфорс работает только для ECB и при нехватке 1-4 байт ключа
+
+Этих запросов будет достаточно для демонстрации всех возможностей вашего сервиса!
